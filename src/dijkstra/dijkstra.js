@@ -15,7 +15,6 @@ class PathPlanner {
   }
 
   /**
-   * 
    * @param {string} from vertex key
    */
   resetPathTable(from) {
@@ -27,9 +26,6 @@ class PathPlanner {
     });
   }
 
-  /**
-   * @param {string} currentNode 
-   */
   calculateNeighboursDistance(currentNode) {
     const neighbours = this.edges[currentNode];
     if (!neighbours || neighbours.length === 0) {
