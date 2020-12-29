@@ -1,3 +1,10 @@
+class PathTableItem {
+  constructor(cost, from) {
+    this.cost = cost;
+    this.from = from;
+  }
+}
+
 class PathPlanner {
   constructor(vertexes, edges) {
     this.vertexes = vertexes;
@@ -10,16 +17,14 @@ class PathPlanner {
   /**
    * 
    * @param {string} from vertex key
-   * 
-   * @returns {key:{number, from}}
    */
-  createInitialTable(from) {
-    return this.vertexes.reduce((accumulator, item) => {
-      accumulator[item] = item === from ?
-        { cost: 0, from: undefined }
-        : { cost: Number.POSITIVE_INFINITY, from: undefined };
-      return accumulator;
-    }, {});
+  resetPathTable(from) {
+    this.vertexes.forEach((item) => {
+      this.pathTable[item] =
+        item === from ?
+          new PathTableItem(0, undefined)
+          : new PathTableItem(Number.POSITIVE_INFINITY, undefined)
+    });
   }
 
   /**
@@ -27,7 +32,7 @@ class PathPlanner {
    */
   calculateNeighboursDistance(currentNode) {
     const neighbours = this.edges[currentNode];
-    if (!neighbours || neighbours.length == 0) {
+    if (!neighbours || neighbours.length === 0) {
       return;
     }
 
@@ -58,6 +63,8 @@ class PathPlanner {
           smallest = item.cost;
           cheapCostKey = vertexKey;
         }
+      } else {
+        console.log('already visited', vertexKey);
       }
     });
 
@@ -65,7 +72,7 @@ class PathPlanner {
   }
 
   removeUnvisited(vertexKey) {
-    var index = this.unvisited.indexOf(vertexKey);
+    const index = this.unvisited.indexOf(vertexKey);
     if (index != -1) {
       this.unvisited.splice(index, 1);
     }
@@ -73,51 +80,33 @@ class PathPlanner {
 
   extractPath(to) {
     let currentNode = to;
-    let maxSteps = 10;
     const path = [];
 
     while (currentNode) {
-      maxSteps--;
-      if (maxSteps == 0) {
-        return path;
-      }
       path.push(currentNode);
-
-      let item = this.pathTable[currentNode];
-      currentNode = item.from;
+      currentNode = this.pathTable[currentNode].from;
     }
-    return path;
+
+    return path.reverse();
   }
 
   execute(from, to) {
-    let safetyCounter = 0;
-    this.pathTable = this.createInitialTable(from);
-
+    this.resetPathTable(from);
     let currentNode = from;
-    let searching = true;
-    let found = false;
+    this.unvisited.push(from);
 
-    while (searching && safetyCounter < 20) {
-      safetyCounter++;
-      if (currentNode === undefined) {
-        searching = false;
+    while (currentNode) {
+      if (currentNode === to) {
+        return this.extractPath(to);
       }
-      else if (currentNode === to) {
-        found = true;
-        searching = false;
-      } else {
-        this.calculateNeighboursDistance(currentNode);
 
-        this.visited.push(currentNode);
-        this.removeUnvisited(currentNode);
-        currentNode = this.pickNextVertexKey();
-      }
-    }
-    console.log('safety counter - ', safetyCounter);
+      this.calculateNeighboursDistance(currentNode);
 
-    if (found) {
-      return this.extractPath(to);
+      this.visited.push(currentNode);
+      this.removeUnvisited(currentNode);
+      currentNode = this.pickNextVertexKey();
     }
+
     return [];
   }
 }
