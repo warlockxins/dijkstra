@@ -1,0 +1,24 @@
+{
+  "name": "dijkstra",
+  "version": "1.0.0",
+  "description": "shortest path algorythm implementation",
+  "main": "index.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/warlockxins/dijkstra.git"
+  },
+  "keywords": [
+    "short",
+    "path",
+    "algorythms"
+  ],
+  "author": "Aleksandrs Semjonovs",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/warlockxins/dijkstra/issues"
+  },
+  "homepage": "https://github.com/warlockxins/dijkstra#readme"
+}
