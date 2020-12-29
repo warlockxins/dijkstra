@@ -63,8 +63,6 @@ class PathPlanner {
           smallest = item.cost;
           cheapCostKey = vertexKey;
         }
-      } else {
-        console.log('already visited', vertexKey);
       }
     });
 

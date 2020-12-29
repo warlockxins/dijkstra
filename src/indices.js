@@ -42,7 +42,8 @@ var in_edgeCosts = {
   ],
   // right branch
   c: [
-    { to: 'l', cost: 2 }
+    { to: 'l', cost: 2 },
+    { to: 'start', cost: 1 }
   ],
   l: [
     { to: 'i', cost: 4 },
