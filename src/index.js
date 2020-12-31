@@ -14,6 +14,4 @@ function searchFromTo(start, end) {
 
     console.log('shortest path', result);
     document.getElementById('result').innerHTML = result.join('<br>');
-
-    // chart();
 }

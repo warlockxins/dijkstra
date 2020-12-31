@@ -1,0 +1,19 @@
+{
+  "name": "dijkstra-warlockxins",
+  "version": "1.0.0",
+  "description": "traversing graph with dijkstra algorithm",
+  "main": "src/dijkstra/dijkstra.js",
+  "scripts": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/warlockxins/dijkstra.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/warlockxins/dijkstra/issues"
+  },
+  "homepage": "https://github.com/warlockxins/dijkstra#readme"
+}
