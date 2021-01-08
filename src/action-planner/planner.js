@@ -1,4 +1,12 @@
+//  inspired by https://www.youtube.com/watch?v=znhd8FzVVds&t=395s
+
 function plan() {
+    console.time('plan');
+    execute();
+    console.timeEnd('plan');
+}
+
+function execute() {
     const leaves = [];
     const startNode = new Gnode(undefined, undefined, worldState, 0);
     buildGraph(startNode, goals, actions, leaves);
@@ -9,7 +17,13 @@ function plan() {
 
     const sortedPlans = leaves.sort((a, b) => a.runningCost - b.runningCost);
     const planIds = extractOrderedPlan(sortedPlans[0]);
-    console.log('----plan cost', sortedPlans[0].runningCost, '; ids', planIds);
+    console.log('plan count', sortedPlans.length, 'cost', sortedPlans[0].runningCost, '; ids', planIds);
+
+    // console.log('first 40 plans...');
+
+    // sortedPlans.slice(0, 40).forEach((plan, index) => {
+    //     console.log(index, 'cost', plan.runningCost, extractOrderedPlan(plan));
+    // })
 }
 
 /**
@@ -67,23 +81,24 @@ class Action {
  * @param {[Gnode]} leaves
  */
 function buildGraph(startNode, availableGoals, availableActions, leaves) {
-    for (const [goalKey, goalState] of Object.entries(availableGoals)) {
-        for (const [key, action] of Object.entries(availableActions)) {
-            const actionHasPreconditions = coversState(startNode.state, action.preConditions);
+    for (const [key, action] of Object.entries(availableActions)) {
+        if (coversState(startNode.state, action.preConditions)) {
+            const nextState = { ...startNode.state, ...action.postConditions };
+            const nextNode = new Gnode(startNode, key, nextState, startNode.runningCost + action.cost);
 
-            if (actionHasPreconditions) {
-                const nextState = { ...startNode.state, ...action.postConditions };
-                const nextNode = new Gnode(startNode, key, nextState, startNode.runningCost + action.cost);
-                const actionFitsGoal = coversState(nextState, goalState);
+            // fits any goal?
+            const matchesGoals = Object.entries(availableGoals).some(([_goalKey, goalState]) => {
+                return (coversState(nextState, goalState));
+            });
 
-                if (actionFitsGoal) {
-                    leaves.push(nextNode);
-                } else {
-                    const nextAvailableActions = { ...availableActions };
-                    delete nextAvailableActions[key];
+            if (matchesGoals) {
+                leaves.push(nextNode);
+            }
+            else {
+                const nextAvailableActions = { ...availableActions };
+                delete nextAvailableActions[key];
 
-                    buildGraph(nextNode, availableGoals, nextAvailableActions, leaves);
-                }
+                buildGraph(nextNode, availableGoals, nextAvailableActions, leaves);
             }
         }
     }

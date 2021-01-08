@@ -12,7 +12,10 @@ const C = {
     nearEnemy: 'nearEnemy',
     hasWeapon: 'hasWeapon',
     hasAmmo: 'hasAmmo',
-    hasBomb: 'hasBomb'
+    hasBomb: 'hasBomb',
+
+    readyForPeace: 'readyForPeace',
+    foundPeace: 'findPeace'
 }
 
 const actions = {
@@ -109,11 +112,11 @@ const actions = {
     // Alternative kill - suicidal
 
     'Attack with Blood': {
-        cost: 5,
+        cost: 6,
         preConditions: {
             [C.injured]: false,
             [C.seeEnemy]: true,
-            [C.onLineOfFire]: true
+            [C.enemyAlive]: true,
         },
         postConditions: {
             [C.enemyAlive]: false,
@@ -127,19 +130,30 @@ const actions = {
         preConditions: {
             [C.injured]: false,
             [C.seeEnemy]: false,
-            [C.onLineOfFire]: false
         },
         postConditions: {
-            [C.enemyAlive]: true,
             [C.seeEnemy]: true,
-            [C.onLineOfFire]: true
         }
     },
+
+    // Find peace
+    'Change mood': {
+        cost: 15,
+        preConditions: {
+            [C.readyForPeace]: true
+        },
+        postConditions: {
+            [C.foundPeace]: true
+        }
+    }
 };
 
 const goals = {
     'Kill the enemy': {
         [C.enemyAlive]: false
+    },
+    'Be peaceful': {
+        [C.foundPeace]: true
     }
 }
 
@@ -156,5 +170,7 @@ const worldState = {
     [C.nearEnemy]: false,
     [C.hasWeapon]: false,
     [C.hasAmmo]: false,
-    [C.hasBomb]: false
+    [C.hasBomb]: false,
+    [C.foundPeace]: false,
+    [C.readyForPeace]: true
 }
