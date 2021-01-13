@@ -15,147 +15,153 @@ const C = {
     hasBomb: 'hasBomb',
 
     readyForPeace: 'readyForPeace',
-    foundPeace: 'findPeace'
+    foundPeace: 'findPeace',
+    snackBars: 5
 }
 
 const actions = {
     'search Weapon': {
         cost: 1,
-        preConditions: {
-            [C.hasWeapon]: false,
-            [C.hasBomb]: false
+        preConditions: (prevState) => {
+            return prevState[C.hasWeapon] === false &&
+                prevState[C.hasBomb] === false;
         },
-        postConditions: {
-            [C.seeWeapon]: true
+        postConditions: (state) => {
+            state[C.seeWeapon] = true;
         }
     },
     // ------------
     'pickupWeapon': {
         cost: 1,
-        preConditions: {
-            [C.seeWeapon]: true,
-            [C.hasWeapon]: false
+        preConditions: (prevState) => {
+            return prevState[C.seeWeapon] === true &&
+                prevState[C.hasWeapon] === false
         },
-        postConditions: {
-            [C.hasWeapon]: true,
-            [C.seeWeapon]: false,
-            [C.hasBomb]: false
+        postConditions: (state) => {
+            state[C.hasWeapon] = true;
+            state[C.seeWeapon] = false;
+            state[C.hasBomb] = false;
         }
     },
     // ------------
     'search Ammo': {
         cost: 1,
-        preConditions: {
-            [C.hasWeapon]: true,
-            [C.hasAmmo]: false,
+        preConditions: (prevState) => {
+            return prevState[C.hasWeapon] === true &&
+                prevState[C.hasAmmo] === false;
         },
-        postConditions: {
-            [C.seeAmmo]: true,
+        postConditions: (state) => {
+            state[C.seeAmmo] = true;
         }
     },
     // ------------
     'pickup Ammo': {
         cost: 1,
-        preConditions: {
-            [C.hasWeapon]: true,
-            [C.hasAmmo]: false,
-            [C.seeAmmo]: true,
+        preConditions: (prevState) => {
+            return prevState[C.hasWeapon] === true &&
+                prevState[C.hasAmmo] === false &&
+                prevState[C.seeAmmo] === true;
         },
-        postConditions: {
-            [C.hasAmmo]: true,
-            [C.seeAmmo]: false,
+        postConditions: (state) => {
+            state[C.hasAmmo] = true;
+            state[C.seeAmmo] = false;
         }
     },
     // ------------
     'scout with Weapon': {
         cost: 1,
-        preConditions: {
-            [C.hasWeapon]: true,
-            [C.hasAmmo]: true,
-            [C.seeEnemy]: false,
+        preConditions: (prevState) => {
+            return prevState[C.hasWeapon] === true &&
+                prevState[C.hasAmmo] === true &&
+                prevState[C.seeEnemy] === false;
         },
-        postConditions: {
-            [C.seeEnemy]: true
+        postConditions: (state) => {
+            state[C.seeEnemy] = true;
         }
     },
     // ------------
     'Aiming': {
         cost: 1,
-        preConditions: {
-            [C.hasWeapon]: true,
-            [C.hasAmmo]: true,
-            [C.seeEnemy]: true,
-            [C.onLineOfFire]: false
+        preConditions: (prevState) => {
+            return prevState[C.hasWeapon] === true &&
+                prevState[C.hasAmmo] === true &&
+                prevState[C.seeEnemy] === true &&
+                prevState[C.onLineOfFire] === false;
         },
-        postConditions: {
-            [C.onLineOfFire]: true
+        postConditions: (state) => {
+            state[C.onLineOfFire] = true;
         }
     },
 
     // ------------
     'Attack with Weapon': {
-        cost: 1,
-        preConditions: {
-            [C.hasWeapon]: true,
-            [C.hasAmmo]: true,
-            [C.seeEnemy]: true,
-            [C.onLineOfFire]: true
+        cost: 2,
+        preConditions: (prevState) => {
+            return prevState[C.hasWeapon] === true &&
+                prevState[C.hasAmmo] === true &&
+                prevState[C.seeEnemy] === true &&
+                prevState[C.onLineOfFire] === true;
         },
-        postConditions: {
-            [C.enemyAlive]: false,
-            [C.seeEnemy]: false,
-            [C.onLineOfFire]: false,
+        postConditions: (state) => {
+            state[C.enemyAlive] = false;
+            state[C.seeEnemy] = false;
+            state[C.onLineOfFire] = false;
         }
     },
-
-
     // Alternative kill - suicidal
 
     'Attack with Blood': {
-        cost: 6,
-        preConditions: {
-            [C.injured]: false,
-            [C.seeEnemy]: true,
-            [C.enemyAlive]: true,
+        cost: 10,
+        preConditions: (prevState) => {
+            return prevState[C.injured] === false
+                && prevState[C.seeEnemy] === true
+                && prevState[C.enemyAlive] === true
         },
-        postConditions: {
-            [C.enemyAlive]: false,
-            [C.seeEnemy]: false,
-            [C.injured]: true,
+        postConditions: (prevState) => {
+            prevState[C.enemyAlive] = false;
+            prevState[C.seeEnemy] = false;
+            prevState[C.injured] = true;
         }
     },
 
     'Scout Suicidal': {
-        cost: 2,
-        preConditions: {
-            [C.injured]: false,
-            [C.seeEnemy]: false,
+        cost: 1,
+        preConditions: (prevState) => {
+            return prevState[C.injured] === false
+                && prevState[C.seeEnemy] === false;
         },
-        postConditions: {
-            [C.seeEnemy]: true,
+        postConditions: (prevState) => {
+            prevState[C.seeEnemy] = true;
         }
     },
 
+
     // Find peace
     'Change mood': {
-        cost: 15,
-        preConditions: {
-            [C.readyForPeace]: true
+        cost: 40,
+        preConditions: (prevState) => {
+            return prevState[C.readyForPeace] === true
         },
-        postConditions: {
-            [C.foundPeace]: true
+        postConditions: (prevState) => {
+            prevState[C.foundPeace] = true;
         }
     }
 };
 
-const goals = {
-    'Kill the enemy': {
-        [C.enemyAlive]: false
+const goals = [
+    {
+        name: 'Kill the enemy',
+        preConditions(state) {
+            return state[C.enemyAlive] === false;
+        }
     },
-    'Be peaceful': {
-        [C.foundPeace]: true
+    {
+        name: 'Be peaceful',
+        preConditions(state) {
+            return state[C.foundPeace] === true
+        }
     }
-}
+]
 
 const worldState = {
     [C.alive]: true,

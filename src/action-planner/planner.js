@@ -19,9 +19,9 @@ function execute() {
     const planIds = extractOrderedPlan(sortedPlans[0]);
     console.log('plan count', sortedPlans.length, 'cost', sortedPlans[0].runningCost, '; ids', planIds);
 
-    // console.log('first 40 plans...');
+    // console.log('first 50 plans...');
 
-    // sortedPlans.slice(0, 40).forEach((plan, index) => {
+    // sortedPlans.slice(0, 50).forEach((plan, index) => {
     //     console.log(index, 'cost', plan.runningCost, extractOrderedPlan(plan));
     // })
 }
@@ -82,13 +82,15 @@ class Action {
  */
 function buildGraph(startNode, availableGoals, availableActions, leaves) {
     for (const [key, action] of Object.entries(availableActions)) {
-        if (coversState(startNode.state, action.preConditions)) {
-            const nextState = { ...startNode.state, ...action.postConditions };
+        if (action.preConditions(startNode.state)) {
+            const nextState = { ...startNode.state };
+            action.postConditions(nextState);
+
             const nextNode = new Gnode(startNode, key, nextState, startNode.runningCost + action.cost);
 
             // fits any goal?
-            const matchesGoals = Object.entries(availableGoals).some(([_goalKey, goalState]) => {
-                return (coversState(nextState, goalState));
+            const matchesGoals = availableGoals.some((goal) => {
+                return goal.preConditions(nextState);
             });
 
             if (matchesGoals) {
@@ -97,15 +99,8 @@ function buildGraph(startNode, availableGoals, availableActions, leaves) {
             else {
                 const nextAvailableActions = { ...availableActions };
                 delete nextAvailableActions[key];
-
                 buildGraph(nextNode, availableGoals, nextAvailableActions, leaves);
             }
         }
     }
-}
-
-function coversState(state, requiredState) {
-    return Object.entries(requiredState).every(([key, value]) => {
-        return state[key] === value;
-    });
 }
