@@ -5,7 +5,7 @@ class PathTableItem {
   }
 }
 
-export class PathPlanner {
+class PathPlanner {
   constructor(vertexes, edges) {
     this.vertexes = vertexes;
     this.edges = edges;

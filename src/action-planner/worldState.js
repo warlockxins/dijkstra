@@ -138,7 +138,7 @@ const actions = {
 
     // Find peace
     'Change mood': {
-        cost: 40,
+        cost: 10,
         preConditions: (prevState) => {
             return prevState[C.readyForPeace] === true
         },

@@ -16,10 +16,9 @@ function execute() {
     }
 
     const sortedPlans = leaves.sort((a, b) => a.runningCost - b.runningCost);
+    // const sortedPlans = leaves;
     const planIds = extractOrderedPlan(sortedPlans[0]);
     console.log('plan count', sortedPlans.length, 'cost', sortedPlans[0].runningCost, '; ids', planIds);
-
-    // console.log('first 50 plans...');
 
     // sortedPlans.slice(0, 50).forEach((plan, index) => {
     //     console.log(index, 'cost', plan.runningCost, extractOrderedPlan(plan));
@@ -88,12 +87,8 @@ function buildGraph(startNode, availableGoals, availableActions, leaves) {
 
             const nextNode = new Gnode(startNode, key, nextState, startNode.runningCost + action.cost);
 
-            // fits any goal?
-            const matchesGoals = availableGoals.some((goal) => {
-                return goal.preConditions(nextState);
-            });
-
-            if (matchesGoals) {
+            // matches goals
+            if (availableGoals.some((goal) => goal.preConditions(nextState))) {
                 leaves.push(nextNode);
             }
             else {
