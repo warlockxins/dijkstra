@@ -1,18 +1,20 @@
-var in_vertexes = [
-  'start',
-  'a',
-  'b',
-  'c',
-  'd',
-  'h',
-  'f',
-  'e',
-  'g',
-  'i',
-  'j',
-  'k',
-  'l'
+var in_vertexesBase = [
+  ['start', {}],
+  ['a', {}],
+  ['b', {}],
+  ['c', {}],
+  ['d', {}],
+  ['h', {}],
+  ['f', {}],
+  ['e', {}],
+  ['g', {}],
+  ['i', {}],
+  ['j', {}],
+  ['k', {}],
+  ['l', {}]
 ];
+
+var in_vertexes = new Map(in_vertexesBase)
 
 var in_edgeCosts = {
   'start': [

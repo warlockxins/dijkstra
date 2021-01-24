@@ -9,10 +9,16 @@ function doPath() {
 
     const from = '6_18';
     const to = '29_18';
-
     searchFromTo(from, to, columns.inVertexes, columns.inEdges);
 }
 
+/**
+ * 
+ * @param {string} start
+ * @param {string} end 
+ * @param {Map} vertices 
+ * @param {*} edges 
+ */
 function searchFromTo(start, end, vertices, edges) {
     console.time('--- Path find');
     const planner = new PathPlanner(vertices, edges);
@@ -34,7 +40,8 @@ const helpers = {
 }
 
 function pointsToTable() {
-    const inVertexes = new Set();
+    // const inVertexes = new Set();
+    const inVertexes = new Map();
     const inEdges = {};
 
     const columns = {};
@@ -45,14 +52,11 @@ function pointsToTable() {
             columns[p.x] = {};
         columns[p.x][p.y] = helpers.solid;
 
-        // if above a solid tile is empty, then is walid for walking
-        // if (!columns[p.x][p.y - 1])
-        //     columns[p.x][p.y - 1] = helpers.wayPointGround
+        const curVertexName = `${p.x}_${p.y}`;
+        // inVertexes.add(curVertexName); // set
+        inVertexes.set(curVertexName, p);
     });
 
-    // for (const [key, column] of Object.entries(columns)) {
-    //     console.log(key, column);
-    // }
 
     // fill points for falling from current block to left and right ... safely
     const checkSides = [-1, 1];
@@ -63,7 +67,7 @@ function pointsToTable() {
 
         for (const [curY, tileType] of Object.entries(curColumn)) {
             const curVertexName = `${keys[index]}_${curY}`;
-            inVertexes.add(curVertexName);
+            // inVertexes.add(curVertexName);
 
             const upY = (+curY) - 1;
             const curTileUp = curColumn[upY];
@@ -87,7 +91,7 @@ function pointsToTable() {
                     if (!itemAtSide && !sideTileUp) {
                         const posBelow = columnWillLand(columnCheck, upY);
                         if (posBelow) {
-                            console.log('-----from', keys[index], curY, 'connect to x:', checkColumnKey, 'y:', posBelow.y, posBelow.waypointType);
+                            // console.log('-----from', keys[index], curY, 'connect to x:', checkColumnKey, 'y:', posBelow.y, posBelow.waypointType);
                         }
                     }
                 }

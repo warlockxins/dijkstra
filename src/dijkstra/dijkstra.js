@@ -1,11 +1,23 @@
 class PathTableItem {
-  constructor(cost, from) {
+  /**
+   * 
+   * @param {number} cost 
+   * @param {string} from 
+   * @param {number} heuristic 
+   */
+  constructor(cost, from, heuristic = 0) {
     this.cost = cost;
     this.from = from;
+    this.heuristic = heuristic;
   }
 }
 
 class PathPlanner {
+  /**
+   * 
+   * @param {Map} vertexes 
+   * @param {*} edges 
+   */
   constructor(vertexes, edges) {
     this.vertexes = vertexes;
     this.edges = edges;
@@ -15,15 +27,29 @@ class PathPlanner {
   }
 
   /**
+   * this needs should help calculate optimistic right direction, 
+   * Must override per need
+   * by default just 0
+   * 
+   * @param {*} fromNode vertex
+   * @param {*} toNode vertex
+   * @returns number
+   */
+  calculateHeuristic(fromNode, toNode) {
+    return 0;
+  }
+
+  /**
    * @param {string} from vertex key
    */
   resetPathTable(from) {
-    this.vertexes.forEach((item) => {
-      this.pathTable[item] =
-        item === from ?
-          new PathTableItem(0, undefined)
-          : new PathTableItem(Number.POSITIVE_INFINITY, undefined)
-    });
+    const fromNode = this.vertexes.get(from);
+    for (const [key, node] of this.vertexes) {
+      this.pathTable[key] =
+        key === from ?
+          new PathTableItem(0, undefined, 0)
+          : new PathTableItem(Number.POSITIVE_INFINITY, undefined, this.calculateHeuristic(fromNode, this.vertexes.get(key)))
+    }
   }
 
   calculateNeighboursDistance(currentNode) {
@@ -33,15 +59,17 @@ class PathPlanner {
     }
 
     const distFrom = this.pathTable[currentNode].cost;
+    const heuristicFrom = this.pathTable[currentNode].heuristic;
 
     neighbours.forEach((edge) => {
       if (this.visited.indexOf(edge.to) === -1) {
         this.unvisited.push(edge.to);
       }
       const elementTo = this.pathTable[edge.to];
+
       const cost = distFrom + edge.cost;
 
-      if (elementTo.cost > cost) {
+      if (elementTo.cost + elementTo.heuristic > cost + heuristicFrom) {
         elementTo.cost = cost;
         elementTo.from = currentNode;
       }
@@ -85,12 +113,15 @@ class PathPlanner {
   }
 
   execute(from, to) {
+    let counter = 0;
     this.resetPathTable(from);
     let currentNode = from;
     this.unvisited.push(from);
 
     while (currentNode) {
+      counter++;
       if (currentNode === to) {
+        console.log('======Counter', counter);
         return this.extractPath(to);
       }
 
