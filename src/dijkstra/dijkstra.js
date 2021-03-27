@@ -36,7 +36,7 @@ class PathPlanner {
    * @returns number
    */
   calculateHeuristic(fromNode, toNode) {
-    return 0;
+    return Math.sqrt(Math.pow((fromNode.x - toNode.x), 2) + Math.pow((fromNode.y - toNode.y), 2));
   }
 
   /**
@@ -69,7 +69,7 @@ class PathPlanner {
 
       const cost = distFrom + edge.cost;
 
-      if (elementTo.cost + elementTo.heuristic > cost + heuristicFrom) {
+      if (elementTo.cost > cost) {
         elementTo.cost = cost;
         elementTo.from = currentNode;
       }
@@ -82,9 +82,11 @@ class PathPlanner {
 
     this.unvisited.forEach((vertexKey) => {
       if (this.visited.indexOf(vertexKey) === -1) {
-        let item = this.pathTable[vertexKey];
-        if (item.cost < smallest) {
-          smallest = item.cost;
+        const { cost, heuristic } = this.pathTable[vertexKey];
+        const itemCostWithHeuristic = cost + heuristic;
+
+        if (itemCostWithHeuristic < smallest) {
+          smallest = itemCostWithHeuristic;
           cheapCostKey = vertexKey;
         }
       }

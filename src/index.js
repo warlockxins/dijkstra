@@ -1,19 +1,10 @@
-class PathPlannerHeuristicXY extends PathPlanner {
-    calculateHeuristic(fromNode, toNode) {
-        const xDiff = fromNode.x - toNode.x;
-        const yDiff = fromNode.y - toNode.y;
-
-        return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
-    }
-}
-
 function doPath() {
     // simplePath();
     pointCloudPath();
 }
 
 function simplePath() {
-    searchFromTo('c', 'e', in_vertexes, in_edgeCosts, PathPlannerHeuristicXY);
+    searchFromTo('h', 'e', in_vertexes, in_edgeCosts);
 }
 
 function pointCloudPath() {
@@ -24,9 +15,9 @@ function pointCloudPath() {
     console.log(columns);
 
 
-    const from = '23_14';
-    const to = '34_18';
-    searchFromTo(from, to, columns.inVertexes, columns.inEdges, PathPlanner);
+    const to = '24_14';
+    const from = '29_18';
+    searchFromTo(from, to, columns.inVertexes, columns.inEdges);
 }
 
 /**
@@ -36,9 +27,9 @@ function pointCloudPath() {
  * @param {Map} vertices 
  * @param {*} edges 
  */
-function searchFromTo(start, end, vertices, edges, plannerStrategy) {
+function searchFromTo(start, end, vertices, edges) {
     console.time('--- Path find');
-    const planner = new plannerStrategy(vertices, edges);
+    const planner = new PathPlanner(vertices, edges);
     const result = planner.execute(start, end)
     console.timeEnd('--- Path find');
 
