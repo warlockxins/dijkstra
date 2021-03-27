@@ -1,5 +1,22 @@
+class PathPlannerHeuristicXY extends PathPlanner {
+    calculateHeuristic(fromNode, toNode) {
+        const xDiff = fromNode.x - toNode.x;
+        const yDiff = fromNode.y - toNode.y;
+
+        return Math.sqrt(xDiff * xDiff + yDiff * yDiff);
+    }
+}
+
 function doPath() {
-    // searchFromTo('c', 'e', in_vertexes, in_edgeCosts);
+    // simplePath();
+    pointCloudPath();
+}
+
+function simplePath() {
+    searchFromTo('c', 'e', in_vertexes, in_edgeCosts, PathPlannerHeuristicXY);
+}
+
+function pointCloudPath() {
 
     console.time('points');
     const columns = pointsToTable();
@@ -7,9 +24,9 @@ function doPath() {
     console.log(columns);
 
 
-    const from = '6_18';
-    const to = '29_18';
-    searchFromTo(from, to, columns.inVertexes, columns.inEdges);
+    const from = '23_14';
+    const to = '34_18';
+    searchFromTo(from, to, columns.inVertexes, columns.inEdges, PathPlanner);
 }
 
 /**
@@ -19,9 +36,9 @@ function doPath() {
  * @param {Map} vertices 
  * @param {*} edges 
  */
-function searchFromTo(start, end, vertices, edges) {
+function searchFromTo(start, end, vertices, edges, plannerStrategy) {
     console.time('--- Path find');
-    const planner = new PathPlanner(vertices, edges);
+    const planner = new plannerStrategy(vertices, edges);
     const result = planner.execute(start, end)
     console.timeEnd('--- Path find');
 
@@ -72,6 +89,7 @@ function pointsToTable() {
             const upY = (+curY) - 1;
             const curTileUp = curColumn[upY];
 
+            // we can stand on this - don't have tile stacked above
             if (!curTileUp) {
                 for (const offset of checkSides) {
                     const resIndex = index + offset;
@@ -83,7 +101,7 @@ function pointsToTable() {
                     const sideTileUp = columnCheck[upY];
                     const itemAtSide = columnCheck[curY];
 
-                    if (itemAtSide) {
+                    if (itemAtSide && !sideTileUp) {
                         connectHorizontalTiles(inEdges, curVertexName, `${checkColumnKey}_${curY}`, 1);
                     }
 
@@ -91,7 +109,14 @@ function pointsToTable() {
                     if (!itemAtSide && !sideTileUp) {
                         const posBelow = columnWillLand(columnCheck, upY);
                         if (posBelow) {
-                            // console.log('-----from', keys[index], curY, 'connect to x:', checkColumnKey, 'y:', posBelow.y, posBelow.waypointType);
+                            const fromVertexKey = `${keys[index]}_${curY}`;
+                            const toVertexKey = `${checkColumnKey}_${posBelow.y}`;
+                            const diagonalCost = 1;
+                            // jump down is possible = add to edges
+                            connectHorizontalTiles(inEdges, fromVertexKey, toVertexKey, diagonalCost);
+
+                            // Todo calculate if can jump up a tile (jump height dependency)
+                            connectHorizontalTiles(inEdges, toVertexKey, fromVertexKey, diagonalCost);
                         }
                     }
                 }
