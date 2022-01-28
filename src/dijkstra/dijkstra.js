@@ -114,6 +114,12 @@ class PathPlanner {
     return path.reverse();
   }
 
+  /**
+   * 
+   * @param {[x, y]} from 
+   * @param {string} to
+   * @returns 
+   */
   execute(from, to) {
     let counter = 0;
     this.resetPathTable(from);

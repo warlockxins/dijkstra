@@ -15,8 +15,8 @@ function pointCloudPath() {
     console.log(columns);
 
 
-    const to = '24_14';
-    const from = '29_18';
+    const to = '24:14';
+    const from = '29:18';
     searchFromTo(from, to, columns.inVertexes, columns.inEdges);
 }
 
@@ -48,7 +48,6 @@ const helpers = {
 }
 
 function pointsToTable() {
-    // const inVertexes = new Set();
     const inVertexes = new Map();
     const inEdges = {};
 
@@ -60,8 +59,7 @@ function pointsToTable() {
             columns[p.x] = {};
         columns[p.x][p.y] = helpers.solid;
 
-        const curVertexName = `${p.x}_${p.y}`;
-        // inVertexes.add(curVertexName); // set
+        const curVertexName = `${p.x}:${p.y}`;
         inVertexes.set(curVertexName, p);
     });
 
@@ -74,8 +72,7 @@ function pointsToTable() {
         const curColumn = columns[keys[index]];
 
         for (const [curY, tileType] of Object.entries(curColumn)) {
-            const curVertexName = `${keys[index]}_${curY}`;
-            // inVertexes.add(curVertexName);
+            const curVertexName = `${keys[index]}:${curY}`;
 
             const upY = (+curY) - 1;
             const curTileUp = curColumn[upY];
@@ -89,26 +86,27 @@ function pointsToTable() {
 
                     const checkColumnKey = keys[resIndex];
                     const columnCheck = columns[checkColumnKey];
-                    const sideTileUp = columnCheck[upY];
-                    const itemAtSide = columnCheck[curY];
 
-                    if (itemAtSide && !sideTileUp) {
-                        connectHorizontalTiles(inEdges, curVertexName, `${checkColumnKey}_${curY}`, 1);
+                    if (columnCheck[upY]) {
+                        continue;
                     }
 
-                    // TODO - add to InEdges
-                    if (!itemAtSide && !sideTileUp) {
-                        const posBelow = columnWillLand(columnCheck, upY);
-                        if (posBelow) {
-                            const fromVertexKey = `${keys[index]}_${curY}`;
-                            const toVertexKey = `${checkColumnKey}_${posBelow.y}`;
-                            const diagonalCost = 1;
-                            // jump down is possible = add to edges
-                            connectHorizontalTiles(inEdges, fromVertexKey, toVertexKey, diagonalCost);
+                    // has neighbour tile, can stand on it
+                    if (columnCheck[curY]) {
+                        connectHorizontalTiles(inEdges, curVertexName, `${checkColumnKey}:${curY}`, 1);
+                        continue
+                    }
+                    // check if can fall down to neighbour tile
+                    const posBelow = columnWillLand(columnCheck, upY);
+                    if (posBelow) {
+                        const fromVertexKey = `${keys[index]}:${curY}`;
+                        const toVertexKey = `${checkColumnKey}:${posBelow.y}`;
+                        const diagonalCost = 1;
+                        // jump down is possible = add to edges
+                        connectHorizontalTiles(inEdges, fromVertexKey, toVertexKey, diagonalCost);
 
-                            // Todo calculate if can jump up a tile (jump height dependency)
-                            connectHorizontalTiles(inEdges, toVertexKey, fromVertexKey, diagonalCost);
-                        }
+                        // Todo calculate if can jump up a tile (jump height dependency)
+                        connectHorizontalTiles(inEdges, toVertexKey, fromVertexKey, diagonalCost);
                     }
                 }
             }
@@ -127,17 +125,11 @@ function connectHorizontalTiles(inEdges, curVertexName, toVertexName, cost) {
 
 
 function columnWillLand(column, belowStart) {
-    // filter by
-    const orderedBelow = Object.entries(column)
-        .filter((a) => {
-            return a[1] === 1 && a[0] > belowStart
-        })
-        .sort(([a], [b]) => {
-            return a - b;
-        });
-
-    return orderedBelow.length > 0 ? {
-        y: orderedBelow[0][0],
-        waypointType: orderedBelow[0][1]
-    } : undefined;
+    let lowest = { y: belowStart, waypointType: -1 };
+    for (const [y, waypointType] of Object.entries(column)) {
+        if (waypointType === 1 && y > belowStart) {
+            lowest = { y, waypointType }
+        }
+    }
+    return lowest.waypointType === -1 ? undefined : lowest;
 }

@@ -2,27 +2,29 @@
 
 function plan() {
     console.time('plan');
-    execute();
+    const sortedPlans = execute();
     console.timeEnd('plan');
+
+    console.log('ids', sortedPlans);
 }
 
 function execute() {
-    const leaves = [];
+    const leaves = {
+        leaf: null,
+        price: 10000
+    };
     const startNode = new Gnode(undefined, undefined, worldState, 0);
     buildGraph(startNode, goals, actions, leaves);
 
-    if (leaves.length === 0) {
-        return;
+
+
+    if (!leaves.leaf) {
+        return [];
     }
 
-    const sortedPlans = leaves.sort((a, b) => a.runningCost - b.runningCost);
-    // const sortedPlans = leaves;
-    const planIds = extractOrderedPlan(sortedPlans[0]);
-    console.log('plan count', sortedPlans.length, 'cost', sortedPlans[0].runningCost, '; ids', planIds);
+    const planIds = extractOrderedPlan(leaves.leaf);
 
-    // sortedPlans.slice(0, 50).forEach((plan, index) => {
-    //     console.log(index, 'cost', plan.runningCost, extractOrderedPlan(plan));
-    // })
+    return planIds;
 }
 
 /**
@@ -58,38 +60,32 @@ class Gnode {
     }
 }
 
-class Action {
-    /**
-     * 
-     * @param {*} preConditions 
-     * @param {*} postConditions 
-     * @param {number} cost 
-     */
-    constructor(preConditions, postConditions, cost) {
-        this.preConditions = preConditions;
-        this.postConditions = postConditions;
-        this.cost = cost;
-    }
-}
-
 /**
  * 
  * @param {Gnode} startNode 
  * @param {*} availableGoals 
  * @param {[key: string]: Action} availableActions 
- * @param {[Gnode]} leaves
+ * @param {{leaf: Gnode, price: number}} leaves
  */
 function buildGraph(startNode, availableGoals, availableActions, leaves) {
     for (const [key, action] of Object.entries(availableActions)) {
         if (action.preConditions(startNode.state)) {
+            const cost = startNode.runningCost + action.cost;
+            if (cost > leaves.price) {
+                continue;
+            }
+
             const nextState = { ...startNode.state };
             action.postConditions(nextState);
 
-            const nextNode = new Gnode(startNode, key, nextState, startNode.runningCost + action.cost);
+            const nextNode = new Gnode(startNode, key, nextState, cost);
 
             // matches goals
             if (availableGoals.some((goal) => goal.preConditions(nextState))) {
-                leaves.push(nextNode);
+                if (leaves.price > cost) {
+                    leaves.leaf = nextNode;
+                    leaves.price = cost;
+                }
             }
             else {
                 const nextAvailableActions = { ...availableActions };

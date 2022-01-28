@@ -151,6 +151,7 @@ const actions = {
 const goals = [
     {
         name: 'Kill the enemy',
+        // goal state, not precondition
         preConditions(state) {
             return state[C.enemyAlive] === false;
         }
